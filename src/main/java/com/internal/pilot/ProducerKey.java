@@ -27,9 +27,15 @@ public class ProducerKey {
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,StringSerializer.class.getName());
 
+        //For Safe Producer
         //Set Producer as Idempotence to ensure kafka does not duplicate messages.
         // This is taken care with producer id which is assigned for every message.
+        //enable.idempotence = true appears in logs
         properties.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG,"True");
+        //Applicable for kafka >2 else set as 1
+        properties.setProperty(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION,"5");
+        properties.setProperty(ProducerConfig.ACKS_CONFIG,"all");
+        properties.setProperty(ProducerConfig.RETRIES_CONFIG,Integer.toString(Integer.MAX_VALUE));
 
 
         KafkaProducer <String,String> producer = new KafkaProducer<>(properties);
