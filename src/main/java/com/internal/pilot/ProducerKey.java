@@ -10,8 +10,8 @@ import java.util.concurrent.Future;
 
 
 /*
-* Following program pushes Messages in RRB manner to 3 partitions that are available for the
-* Topic.If key was included Message would have gone only to specific partition
+* Following program pushes Messages in Key ordered manner to 3 partitions that are available for the
+* Topic.This is since we included key
 * */
 public class ProducerKey {
 
@@ -27,12 +27,19 @@ public class ProducerKey {
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,StringSerializer.class.getName());
 
+        //Set Producer as Idempotence to ensure kafka does not duplicate messages.
+        // This is taken care with producer id which is assigned for every message.
+        properties.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG,"True");
+
 
         KafkaProducer <String,String> producer = new KafkaProducer<>(properties);
         for (int i=0;i<10;i++)
         {
             //Create producer
             String key = "ID_"+Integer.toString(i);
+//          If we try with same key the program will push the message to same partitionin this case it
+//          pushes to partition 2
+//          String key = "ID_"+Integer.toString(5);
             String value = "Message With Key ::"+Integer.toString(i);
             ProducerRecord producerRecord = new ProducerRecord(TOPIC,key,value);
             final Future error_while_sending = producer.send(producerRecord, new Callback() {
@@ -40,7 +47,9 @@ public class ProducerKey {
                 public void onCompletion(RecordMetadata recordMetadata, Exception e) {
                     if (e == null) {
                         logger.info("RecordMetadata Topic:: " + recordMetadata.topic() + " Offset ::" +
-                                recordMetadata.offset() + " Partition:: " +
+                                recordMetadata.offset() +
+                                "Key :: " + key + " Partition:: " +
+
                                 recordMetadata.partition() + " TS:: " +
                                 recordMetadata.timestamp());
 //                                logger.info("RecordMetadata Offset:: " + recordMetadata.offset() + "");
