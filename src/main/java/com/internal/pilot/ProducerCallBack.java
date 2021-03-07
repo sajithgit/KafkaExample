@@ -7,6 +7,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
+
+/*
+* Following program pushes Messages in RRB manner to 3 partitions that are available for the
+* Topic.If key was included Message would have gone only to specific partition
+* */
 public class ProducerCallBack {
 
     public static void main(String[] args) {
